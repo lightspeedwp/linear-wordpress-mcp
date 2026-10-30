@@ -1,0 +1,21 @@
+{
+  "mcps": {
+    "linear-wordpress": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./dist/index.js"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}",
+        "WORDPRESS_REST_API_URL": "${WORDPRESS_REST_API_URL}",
+        "WORDPRESS_AUTH_USER": "${WORDPRESS_AUTH_USER}",
+        "WORDPRESS_AUTH_PASSWORD": "${WORDPRESS_AUTH_PASSWORD}"
+      },
+      "disabled": false
+    },
+    "zendesk": {
+      "type": "http",
+      "url": "https://lightspeed-zendesk-mcp.lsh.workers.dev/mcp",
+      "disabled": false
+    }
+  }
+}
