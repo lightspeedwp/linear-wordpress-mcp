@@ -13,6 +13,7 @@
     "test:bats": "bats tests/*.bats",
     "test:bats:verbose": "bats --verbose tests/*.bats",
     "test:all": "npm test && npm run test:bats",
+    "quality-check": "bash .claude/skills/linear-mcp-quality-check/scripts/quality-check.sh",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "start": "node dist/index.js"
