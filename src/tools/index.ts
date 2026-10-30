@@ -193,7 +193,7 @@ const searchWordPressPosts: ToolDefinition = {
     },
     required: ["query"],
   },
-  async handler(input, linearClient, wordPressClient) {
+  async handler(input, _linearClient, wordPressClient) {
     if (!wordPressClient) throw new Error("WordPress client not configured");
     const parsed = SearchWordPressPostsSchema.parse(input);
     const posts = await wordPressClient.searchPosts(parsed.query);
@@ -215,7 +215,7 @@ const getWordPressPost: ToolDefinition = {
     },
     required: ["post_id"],
   },
-  async handler(input, linearClient, wordPressClient) {
+  async handler(input, _linearClient, wordPressClient) {
     if (!wordPressClient) throw new Error("WordPress client not configured");
     const parsed = GetWordPressPostSchema.parse(input);
     const post = await wordPressClient.getPost(parsed.post_id);
@@ -251,7 +251,7 @@ const createWordPressPost: ToolDefinition = {
     },
     required: ["title", "content"],
   },
-  async handler(input, linearClient, wordPressClient) {
+  async handler(input, _linearClient, wordPressClient) {
     if (!wordPressClient) throw new Error("WordPress client not configured");
     const parsed = CreateWordPressPostSchema.parse(input);
     const post = await wordPressClient.createPost(

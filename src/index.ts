@@ -6,11 +6,8 @@
  * Supports multiple MCPs simultaneously
  */
 
-import {
-  Server,
-  type Tool,
-} from "@modelcontextprotocol/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/server/stdio.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { LinearClient } from "./linear/client.js";
 import { WordPressClient } from "./wordpress/client.js";
 import { tools, getToolByName } from "./tools/index.js";
@@ -72,66 +69,40 @@ function initializeClients(): void {
   }
 }
 
-// Convert tool definitions to MCP Tool format
-function toolsToMCPTools(): Tool[] {
-  return tools.map((toolDef) => ({
-    name: toolDef.name,
-    description: toolDef.description,
-    inputSchema: toolDef.inputSchema,
-  }));
-}
+// Register all available tools
+const toolDefinitions = tools.map((toolDef) => ({
+  name: toolDef.name,
+  description: toolDef.description,
+  inputSchema: toolDef.inputSchema,
+}));
 
-// Handle tool calls
-server.setRequestHandler(async (request) => {
-  if (request.method === "tools/list") {
-    return {
-      tools: toolsToMCPTools(),
-    };
+// Set up server request handler
+server.setRequestHandler(toolDefinitions as any, async (name: string, args: unknown): Promise<Record<string, unknown>> => {
+  const toolDef = getToolByName(name);
+
+  if (!toolDef) {
+    throw new Error(`Tool not found: ${name}`);
   }
 
-  if (request.method === "tools/call") {
-    const { name, arguments: args } = request.params;
-    const toolDef = getToolByName(name as string);
+  const context: ToolContext = {
+    env: {
+      LINEAR_API_KEY: process.env.LINEAR_API_KEY || "",
+      WORDPRESS_REST_API_URL: process.env.WORDPRESS_REST_API_URL || "",
+      WORDPRESS_AUTH_USER: process.env.WORDPRESS_AUTH_USER || "",
+      WORDPRESS_AUTH_PASSWORD: process.env.WORDPRESS_AUTH_PASSWORD || "",
+    },
+    userEmail: process.env.USER_EMAIL,
+  };
 
-    if (!toolDef) {
-      throw new Error(`Tool not found: ${name}`);
-    }
-
-    const context: ToolContext = {
-      env: {
-        LINEAR_API_KEY: process.env.LINEAR_API_KEY || "",
-        WORDPRESS_REST_API_URL: process.env.WORDPRESS_REST_API_URL || "",
-        WORDPRESS_AUTH_USER: process.env.WORDPRESS_AUTH_USER || "",
-        WORDPRESS_AUTH_PASSWORD: process.env.WORDPRESS_AUTH_PASSWORD || "",
-      },
-      userEmail: process.env.USER_EMAIL,
-    };
-
-    try {
-      const result = await toolDef.handler(
-        args,
-        linearClient,
-        wordPressClient,
-        context
-      );
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error(`[MCP] Tool error in ${name}:`, errorMessage);
-      throw new Error(`Tool execution failed: ${errorMessage}`);
-    }
+  try {
+    const result = await toolDef.handler(args, linearClient, wordPressClient, context);
+    return result as Record<string, unknown>;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : String(error);
+    console.error(`[MCP] Tool error in ${name}:`, errorMessage);
+    throw new Error(`Tool execution failed: ${errorMessage}`);
   }
-
-  throw new Error(`Unknown method: ${request.method}`);
 });
 
 // Main server startup

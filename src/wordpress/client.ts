@@ -163,15 +163,19 @@ export class WordPressClient {
   }
 
   private mapWordPressPost(data: Record<string, unknown>): WordPressPost {
+    const titleData = data.title as Record<string, unknown> | undefined;
+    const contentData = data.content as Record<string, unknown> | undefined;
+    const excerptData = data.excerpt as Record<string, unknown> | undefined;
+
     return {
       id: Number(data.id),
-      title: String(data.title?.rendered || ""),
-      content: String(data.content?.rendered || ""),
+      title: String(titleData?.rendered || ""),
+      content: String(contentData?.rendered || ""),
       status: String(data.status || "draft") as "publish" | "draft" | "pending" | "private",
       date: String(data.date || ""),
       modified: String(data.modified || ""),
       author: Number(data.author || 0),
-      excerpt: String(data.excerpt?.rendered || ""),
+      excerpt: String(excerptData?.rendered || ""),
       link: String(data.link || ""),
       type: String(data.type || "post"),
     };
