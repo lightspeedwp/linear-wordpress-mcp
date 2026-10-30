@@ -1,0 +1,136 @@
+{
+  "id": "linear-wordpress-mcp",
+  "name": "Linear-WordPress Integration",
+  "version": "1.0.0",
+  "description": "Connect Linear issues to WordPress posts. Search, create, and link issues and posts directly from Claude conversations.",
+  "author": "LightSpeed WP",
+  "homepage": "https://github.com/lightspeedwp/linear-wordpress-mcp",
+  "iconUrl": "https://cdn-icons-png.flaticon.com/128/10628/10628520.png",
+  "capabilities": {
+    "issues": {
+      "name": "Linear Issues",
+      "description": "Search, view, and create Linear issues",
+      "tools": [
+        "search_linear_issues",
+        "get_linear_issue",
+        "get_linear_teams",
+        "create_linear_issue"
+      ]
+    },
+    "content": {
+      "name": "WordPress Content",
+      "description": "Search, view, and create WordPress posts",
+      "tools": [
+        "search_wordpress_posts",
+        "get_wordpress_post",
+        "create_wordpress_post"
+      ]
+    },
+    "linking": {
+      "name": "Issue-to-Content Linking",
+      "description": "Link Linear issues to WordPress posts for tracking relationships",
+      "tools": [
+        "link_issue_to_post"
+      ]
+    }
+  },
+  "requiredEnvVars": [
+    {
+      "name": "LINEAR_API_KEY",
+      "description": "Linear API key from Settings > API > Personal API keys",
+      "type": "secret",
+      "examples": ["lin_api_abc123xyz..."]
+    },
+    {
+      "name": "WORDPRESS_REST_API_URL",
+      "description": "WordPress REST API endpoint (e.g., https://site.com/wp-json/wp/v2)",
+      "type": "string",
+      "examples": ["https://myblog.com/wp-json/wp/v2"]
+    },
+    {
+      "name": "WORDPRESS_AUTH_USER",
+      "description": "WordPress username for REST API authentication",
+      "type": "string",
+      "examples": ["admin"]
+    },
+    {
+      "name": "WORDPRESS_AUTH_PASSWORD",
+      "description": "WordPress application password (NOT regular password - create in Users > App Passwords)",
+      "type": "secret",
+      "examples": ["xxxx xxxx xxxx xxxx xxxx xxxx"]
+    }
+  ],
+  "optionalEnvVars": [
+    {
+      "name": "USER_EMAIL",
+      "description": "Optional email for audit logging when creating/linking items",
+      "type": "string",
+      "examples": ["user@example.com"]
+    }
+  ],
+  "setupGuide": {
+    "steps": [
+      {
+        "title": "Get Linear API Key",
+        "instructions": "1. Go to Linear Settings > API\n2. Click 'Create personal API key'\n3. Copy and save the key\n4. Paste into LINEAR_API_KEY environment variable"
+      },
+      {
+        "title": "Setup WordPress REST API Access",
+        "instructions": "1. In WordPress admin, go to Users > Your Profile\n2. Scroll to 'Application Passwords'\n3. Create new application password for 'Linear MCP'\n4. Copy username and password\n5. Set WORDPRESS_AUTH_USER and WORDPRESS_AUTH_PASSWORD\n6. REST API URL is typically: https://your-site.com/wp-json/wp/v2"
+      },
+      {
+        "title": "Verify Connection",
+        "instructions": "1. In Claude, run 'get_linear_teams' - should return your teams\n2. Run 'search_wordpress_posts' with a common term\n3. If both work, you're ready to use the integration!"
+      }
+    ]
+  },
+  "useCases": [
+    {
+      "title": "Document Bug Fixes",
+      "description": "Find completed bug fixes in Linear and create blog posts to document the solution",
+      "workflow": "1. Search Linear for closed bugs\n2. Get issue details\n3. Create WordPress post\n4. Link the two together"
+    },
+    {
+      "title": "Track Feature Requests",
+      "description": "Create documentation for new features and link them to the original feature requests",
+      "workflow": "1. Search for feature request issues\n2. Create feature announcement post\n3. Link post to issue\n4. Keep team updated"
+    },
+    {
+      "title": "Content-Driven Development",
+      "description": "Create blog posts and automatically create follow-up tasks in Linear",
+      "workflow": "1. Browse WordPress posts\n2. Identify gaps needing implementation\n3. Create Linear issues for development\n4. Link everything together"
+    },
+    {
+      "title": "Customer Communication",
+      "description": "Link support tickets to relevant documentation",
+      "workflow": "1. Search for relevant help content\n2. Link to customer-facing issues\n3. Provide better support context"
+    }
+  ],
+  "examplePrompts": [
+    "Search for 'authentication' issues in Linear and show me the high priority ones",
+    "Create a WordPress post about our latest security update and link it to the issue",
+    "Find all blog posts tagged 'API' and search for related Linear issues",
+    "Create a new issue in our Engineering team about implementing the feature we just blogged about",
+    "Show me all posts in draft status and create Linear issues to complete them",
+    "Link our latest product announcement to the launch issue in Linear"
+  ],
+  "multiMcpSupport": {
+    "enabled": true,
+    "description": "Works seamlessly with other MCPs like Zendesk, GitHub, Slack",
+    "examples": [
+      "Use with Zendesk MCP: Link customer tickets to both Linear issues and WordPress documentation",
+      "Use with GitHub MCP: Link GitHub PRs to WordPress releases and Linear milestones",
+      "Use with Slack MCP: Announce new posts and issues from within Slack conversations"
+    ]
+  },
+  "dataHandling": {
+    "storage": "All data stays in your Linear workspace and WordPress site. No data is stored by this MCP.",
+    "privacy": "API credentials are handled securely and never logged. All connections use HTTPS.",
+    "caching": "The MCP does not cache data - each tool call retrieves fresh information."
+  },
+  "troubleshooting": {
+    "linearNotConnecting": "1. Verify LINEAR_API_KEY is set correctly\n2. Check API key hasn't expired\n3. Verify permissions in Linear (Settings > API)\n4. Check network connectivity",
+    "wordPressNotConnecting": "1. Verify WORDPRESS_REST_API_URL is correct format\n2. Confirm username and password are correct\n3. Check that REST API is enabled (Plugins > should have REST API)\n4. Ensure user has REST API permissions",
+    "toolsNotAppearing": "1. Restart Claude\n2. Verify environment variables are set\n3. Check MCP connection status\n4. Refresh browser"
+  }
+}
