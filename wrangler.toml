@@ -1,0 +1,39 @@
+name = "linear-wordpress-mcp"
+main = "dist/cloudflare-worker.js"
+compatibility_date = "2026-10-30"
+node_compat = true
+
+# Production environment
+[env.production]
+name = "linear-wordpress-mcp"
+routes = [
+  { pattern = "linear-wordpress-mcp.lsh.workers.dev/mcp", zone_name = "lsh.workers.dev" }
+]
+vars = { ENVIRONMENT = "production" }
+
+# Staging environment
+[env.staging]
+name = "linear-wordpress-mcp-staging"
+routes = [
+  { pattern = "linear-wordpress-mcp-staging.lsh.workers.dev/mcp", zone_name = "lsh.workers.dev" }
+]
+vars = { ENVIRONMENT = "staging" }
+
+# Environment variables and secrets
+# Secrets are set via: wrangler secret put KEY --env production
+#
+# REQUIRED SECRETS:
+# - LINEAR_API_KEY          Linear API key from https://linear.app/settings/api
+# - WORDPRESS_REST_API_URL  Your WordPress site's REST API base URL
+# - WORDPRESS_AUTH_USER     WordPress username or email for REST API auth
+# - WORDPRESS_AUTH_PASSWORD Application password (not your account password)
+# - MCP_AUTH_TOKEN          Bearer token for authenticating MCP requests (generate: `openssl rand -hex 32`)
+# - USER_EMAIL              Your email address for logging purposes
+#
+# Set each secret with:
+#   wrangler secret put LINEAR_API_KEY --env production
+#   wrangler secret put WORDPRESS_REST_API_URL --env production
+#   wrangler secret put WORDPRESS_AUTH_USER --env production
+#   wrangler secret put WORDPRESS_AUTH_PASSWORD --env production
+#   wrangler secret put MCP_AUTH_TOKEN --env production
+#   wrangler secret put USER_EMAIL --env production

@@ -1,0 +1,126 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Deploy to Staging
+        uses: cloudflare/wrangler-action@dd28f83a2d0c3a2d6d1d2e0b3e8a9d5e6c8f7b1a # v3.7.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          environment: staging
+          secrets: |
+            LINEAR_API_KEY
+            WORDPRESS_REST_API_URL
+            WORDPRESS_AUTH_USER
+            WORDPRESS_AUTH_PASSWORD
+            MCP_AUTH_TOKEN
+            USER_EMAIL
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          WORDPRESS_REST_API_URL: ${{ secrets.WORDPRESS_REST_API_URL }}
+          WORDPRESS_AUTH_USER: ${{ secrets.WORDPRESS_AUTH_USER }}
+          WORDPRESS_AUTH_PASSWORD: ${{ secrets.WORDPRESS_AUTH_PASSWORD }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+
+      - name: Test Staging Deployment
+        run: |
+          echo "Testing staging endpoint..."
+          curl -X POST https://linear-wordpress-mcp-staging.lsh.workers.dev/mcp \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.MCP_AUTH_TOKEN }}" \
+            -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            -m 10 || echo "Staging test failed (may be expected if endpoint not ready)"
+
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: cloudflare/wrangler-action@dd28f83a2d0c3a2d6d1d2e0b3e8a9d5e6c8f7b1a # v3.7.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          environment: production
+          secrets: |
+            LINEAR_API_KEY
+            WORDPRESS_REST_API_URL
+            WORDPRESS_AUTH_USER
+            WORDPRESS_AUTH_PASSWORD
+            MCP_AUTH_TOKEN
+            USER_EMAIL
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          WORDPRESS_REST_API_URL: ${{ secrets.WORDPRESS_REST_API_URL }}
+          WORDPRESS_AUTH_USER: ${{ secrets.WORDPRESS_AUTH_USER }}
+          WORDPRESS_AUTH_PASSWORD: ${{ secrets.WORDPRESS_AUTH_PASSWORD }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+
+      - name: Test Production Deployment
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          echo "Testing production endpoint..."
+          curl -X POST https://linear-wordpress-mcp.lsh.workers.dev/mcp \
+            -H "Content-Type: application/json" \
+            -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            -m 10 || echo "Production test failed (may be expected if endpoint not ready)"
+
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Staging**: https://linear-wordpress-mcp-staging.lsh.workers.dev/mcp" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.ref }}" == "refs/heads/main" ] && [ "${{ github.event_name }}" == "push" ]; then
+            echo "- **Production**: https://linear-wordpress-mcp.lsh.workers.dev/mcp" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Setup Required (One-time)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Before this workflow runs successfully, add these secrets to your GitHub repository:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. **CLOUDFLARE_API_TOKEN** — Create in Cloudflare Dashboard:" >> $GITHUB_STEP_SUMMARY
+          echo "   - Go to My Profile > API Tokens" >> $GITHUB_STEP_SUMMARY
+          echo "   - Create Token with Workers permissions" >> $GITHUB_STEP_SUMMARY
+          echo "   - Copy the token to GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "2. **LINEAR_API_KEY** — From Linear account settings" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "3. **WORDPRESS_REST_API_URL** — Your WordPress site's REST API URL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "4. **WORDPRESS_AUTH_USER** — WordPress username or email" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "5. **WORDPRESS_AUTH_PASSWORD** — WordPress application password" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "6. **USER_EMAIL** — Email for logging (e.g., ashley@lightspeedwp.agency)" >> $GITHUB_STEP_SUMMARY

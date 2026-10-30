@@ -1,0 +1,117 @@
+---
+# Lefthook Configuration Template for Linear-WordPress MCP
+# Place this as .lefthook.yml in the project root
+# Reference: https://lefthook.dev/
+
+# Global configuration
+min_nodejs_version: 18.0.0
+node_compat: true  # For Cloudflare Workers compatibility
+
+# Environment configuration
+env:
+  HUSKY: 0  # Disable Husky if installed
+
+# Pre-commit hook: run before git commit
+pre-commit:
+  commands:
+    branch-check:
+      glob: ""  # Run once per commit, not on file changes
+      run: |
+        # Validate branch name format
+        BRANCH=$(git symbolic-ref --short HEAD)
+
+        # Pattern: {type}/{ticket}/{description}
+        # Types: feature, bugfix, docs, refactor, test, chore, ci
+        if [[ ! "$BRANCH" =~ ^(feature|bugfix|docs|refactor|test|chore|ci)/ ]]; then
+          echo "❌ Invalid branch name: $BRANCH"
+          echo ""
+          echo "Branch naming convention:"
+          echo "  Format: {type}/{ticket-id}/{description}"
+          echo "  Types: feature, bugfix, docs, refactor, test, chore, ci"
+          echo "  Example: feature/LW-123/add-linear-search"
+          echo ""
+          echo "To rename this branch:"
+          echo "  git branch -m $BRANCH feature/LW-XXX/your-feature"
+          exit 1
+        fi
+        echo "✅ Branch name is valid: $BRANCH"
+
+    quality-check:
+      glob: "{src,__tests__,tests}/**/*.{ts,js,sh}"
+      run: |
+        npm run quality-check || {
+          echo ""
+          echo "💡 Tip: Run 'npm run quality-check' locally to debug issues"
+          exit 1
+        }
+      stage_fixed: true  # Auto-stage any auto-fixed files
+
+    type-check:
+      glob: "src/**/*.ts"
+      run: npm run typecheck
+      stage_fixed: true
+
+# Pre-push hook: run before git push
+pre-push:
+  commands:
+    final-check:
+      glob: ""  # Run once before push
+      run: |
+        echo "🚀 Running final quality checks before push..."
+        npm run test:all
+      stage_fixed: true
+
+# Commit message hook: validate commit messages
+commit-msg:
+  commands:
+    validate-commit:
+      glob: ""  # Always run
+      run: |
+        MSG=$(cat "$1")
+
+        # Commit message format:
+        # {type}: {description}
+        #
+        # Supported types: feat, fix, docs, style, refactor, perf, test, chore, ci, build
+        if [[ ! "$MSG" =~ ^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?:\ .{1,} ]]; then
+          echo "❌ Invalid commit message format"
+          echo ""
+          echo "Commit message format:"
+          echo "  {type}: {description}"
+          echo ""
+          echo "Examples:"
+          echo "  feat: add Linear search by label"
+          echo "  fix: handle empty WordPress response"
+          echo "  docs: update API reference"
+          echo "  test: add integration tests for linking"
+          echo ""
+          echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build"
+          exit 1
+        fi
+        echo "✅ Commit message format is valid"
+
+# Post-commit hook: informational
+post-commit:
+  commands:
+    post-commit-info:
+      glob: ""  # Run after every commit
+      run: |
+        BRANCH=$(git symbolic-ref --short HEAD)
+        COMMIT=$(git rev-parse --short HEAD)
+        echo ""
+        echo "✅ Commit created: $COMMIT on $BRANCH"
+        echo ""
+        echo "Next steps:"
+        echo "  1. Push: git push origin $BRANCH"
+        echo "  2. Create PR on GitHub"
+        echo "  3. Request code review"
+
+# Skip hooks for certain commits
+skip:
+  - merge
+  - rebase
+  - fast-forward
+
+# Specify the source directory for hook scripts
+# Hooks will look in these directories for additional scripts
+source_dir: .git/hooks
