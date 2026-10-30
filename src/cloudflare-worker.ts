@@ -36,6 +36,19 @@ async function handleRequest(request: Request, env: CloudflareEnv): Promise<Resp
     return new Response('Not found', { status: 404 })
   }
 
+  // Verify authentication token is properly configured
+  if (!env.MCP_AUTH_TOKEN || env.MCP_AUTH_TOKEN.length < 32) {
+    console.error('MCP_AUTH_TOKEN not configured or too short')
+    return new Response(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Server misconfigured' },
+        id: null
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   // Require authentication token
   const authHeader = request.headers.get('Authorization')
   const expectedAuth = `Bearer ${env.MCP_AUTH_TOKEN}`

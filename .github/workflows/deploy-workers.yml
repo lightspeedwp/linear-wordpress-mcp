@@ -19,7 +19,28 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      # Required secrets for deployment
+      REQUIRED_SECRETS: |
+        CLOUDFLARE_API_TOKEN
+        LINEAR_API_KEY
+        WORDPRESS_REST_API_URL
+        WORDPRESS_AUTH_USER
+        WORDPRESS_AUTH_PASSWORD
+        MCP_AUTH_TOKEN
+        USER_EMAIL
     steps:
+      - name: Validate Required Secrets
+        run: |
+          echo "🔐 Validating required secrets are configured..."
+          for secret in $REQUIRED_SECRETS; do
+            if [ -z "$(eval echo \$$secret)" ]; then
+              echo "❌ Error: $secret is not configured"
+              echo "Please add $secret to GitHub repository secrets"
+              exit 1
+            fi
+          done
+          echo "✅ All required secrets are configured"
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4

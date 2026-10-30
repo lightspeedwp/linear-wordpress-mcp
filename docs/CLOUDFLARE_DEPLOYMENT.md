@@ -172,13 +172,37 @@ The MCP endpoint is **protected with bearer token authentication**. Every reques
 Authorization: Bearer <MCP_AUTH_TOKEN>
 ```
 
-**Generate your token:**
+### Token Requirements
+
+- **Length:** Minimum 32 characters (256 bits) — validated on server
+- **Format:** Hex-encoded random string (use `openssl rand -hex 32`)
+- **Security:** Stored as Cloudflare Worker secret, never in code
+- **Rotation:** Refresh quarterly for security best practices
+
+### Generate Your Token
+
 ```bash
+# Generate a cryptographically secure 32-byte (256-bit) token
 MCP_TOKEN=$(openssl rand -hex 32)
-# Save this securely
+echo "Your MCP_AUTH_TOKEN: $MCP_TOKEN"
+# Save this securely — you'll need it to set up Cloudflare secrets
 ```
 
-**Without proper authentication, requests return 401 Unauthorized.**
+### Server Validation
+
+The server validates:
+- ✅ Token is configured (fails with **500** if missing)
+- ✅ Token is at least 32 characters (fails with **500** if too short)
+- ✅ Authorization header matches token (fails with **401** if invalid)
+- ✅ Timing-safe comparison prevents timing attacks
+
+### Response Codes
+
+- **401 Unauthorized** — Invalid or missing Authorization header
+- **500 Server Misconfigured** — Token not set or too short
+  - This indicates a configuration problem on the server
+  - Check that MCP_AUTH_TOKEN is set in Cloudflare environment variables
+  - Verify the token is at least 32 characters long
 
 ---
 
