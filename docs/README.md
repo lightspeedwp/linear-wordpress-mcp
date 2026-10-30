@@ -1,20 +1,34 @@
 # Linear-WordPress MCP - Documentation Index
 
-Complete documentation for the Linear-WordPress MCP project.
+Complete documentation for setting up, deploying, and securing the Linear-WordPress MCP server.
 
 ---
 
-## Getting Started
+## 🚀 Quick Start by Path
 
-**New to the project?** Start here:
+Choose your path based on what you need:
 
-1. [Setup Guide](../SETUP_GUIDE.md) — Install and configure the MCP
-2. [Quick Reference](../QUICK_REFERENCE.md) — Command cheat sheet
-3. [Claude Code Instructions](./../.claude/instructions.md) — Integration with Claude
+| Path | Time | For You | Start Here |
+|------|------|---------|-----------|
+| ⚡ **Just Deploy** | 10 min | Experienced devs | [QUICKSTART_CLOUDFLARE.md](QUICKSTART_CLOUDFLARE.md) |
+| 📋 **Complete Setup** | 1.5 hrs | First-time setup | [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md) |
+| 🔒 **Just Security** | 20 min | Auth/ops focused | [SECURITY_AUTHENTICATION.md](SECURITY_AUTHENTICATION.md) |
+| 🔑 **Just GitHub** | 15 min | DevOps focused | [GITHUB_SECRETS.md](GITHUB_SECRETS.md) |
 
 ---
 
-## Core Documentation
+## 📚 Core Documentation
+
+### Deployment & Setup (NEW - Cloudflare Workers)
+
+- **[QUICKSTART_CLOUDFLARE.md](QUICKSTART_CLOUDFLARE.md)** — 5-minute deployment to Cloudflare Workers
+- **[COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)** — Full end-to-end setup from scratch
+- **[CLOUDFLARE_DEPLOYMENT.md](./CLOUDFLARE_DEPLOYMENT.md)** — Detailed Cloudflare Workers guide
+
+### Security & Configuration (NEW)
+
+- **[SECURITY_AUTHENTICATION.md](SECURITY_AUTHENTICATION.md)** — Authentication token management and security
+- **[GITHUB_SECRETS.md](GITHUB_SECRETS.md)** — GitHub Actions secrets configuration
 
 ### User Guides
 
@@ -101,6 +115,13 @@ npm run test
 
 ### I want to...
 
+#### Deploy to Cloudflare Workers (NEW!)
+1. Quick: [QUICKSTART_CLOUDFLARE.md](QUICKSTART_CLOUDFLARE.md) — 10-minute deploy
+2. Full: [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md) — Complete end-to-end
+3. Details: [CLOUDFLARE_DEPLOYMENT.md](./CLOUDFLARE_DEPLOYMENT.md) — Full reference
+4. Security: [SECURITY_AUTHENTICATION.md](SECURITY_AUTHENTICATION.md) — Auth setup
+5. GitHub: [GITHUB_SECRETS.md](GITHUB_SECRETS.md) — Actions automation
+
 #### Use the MCP in Claude
 1. [SETUP_GUIDE.md](../SETUP_GUIDE.md) — Set up credentials
 2. [.claude/instructions.md](./../.claude/instructions.md) — Add to Claude Code
@@ -121,11 +142,6 @@ npm run test
 2. [ARCHITECTURE.md](../ARCHITECTURE.md) — System design
 3. [AGENTS.md](../AGENTS.md) — Available development tools
 4. [docs/API_REFERENCE.md](./API_REFERENCE.md) — Tool reference
-
-#### Deploy to production
-1. [docs/DEPLOYMENT.md](./DEPLOYMENT.md) — Deployment guide
-2. [CHANGELOG.md](../CHANGELOG.md) — Version management
-3. [.github/ files](./../.github/) — CI/CD configuration
 
 #### Debug a problem
 1. [docs/TROUBLESHOOTING.md](./TROUBLESHOOTING.md) — Common issues
