@@ -7,8 +7,12 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:verbose": "jest --verbose --coverage",
+    "test:bats": "bats tests/*.bats",
+    "test:bats:verbose": "bats --verbose tests/*.bats",
+    "test:all": "npm test && npm run test:bats",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "start": "node dist/index.js"
@@ -18,13 +22,14 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.8",
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
-    "@vitest/coverage-v8": "^1.1.0",
     "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.5.0",
-    "vitest": "^1.1.0"
+    "typescript": "^5.5.0"
   }
 }
